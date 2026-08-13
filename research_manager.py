@@ -1,3 +1,6 @@
+# ====================================================================
+# STEP 1:Import necessary modules and classes for the research manager
+# ====================================================================
 from agents import trace, gen_trace_id
 from agentss.search_agent import search_agent
 from agentss.planner_agent import planner_agent, WebSearchItem, WebSearchPlan
@@ -158,13 +161,19 @@ class LocalFileTraceProcessor:
         pass  # nothing buffered — every write is immediate
 
 # ============================================================
-# STEP 4: Replace default trace processors with our local one
+# STEP 3: Replace default trace processors with our local one
 # (prevents the 401 error from OpenAI's default backend)
 # ============================================================
 set_trace_processors([LocalFileTraceProcessor()])
 
+# ===============================================================================
+# STEP 4: Define the ResearchManager class that orchestrates the research process
+# ===============================================================================
 class ResearchManager:
+    """Orchestrates the research process: planning searches, performing them, writing a report, 
+    and sending an email with the results."""
 
+    # Define the main run method that executes the research workflow
     async def run(self, query: str, cancel_event=None):
         """Run the research process, yielding status updates and the final report.
 
@@ -206,27 +215,32 @@ class ResearchManager:
             yield "Email sent, research complete"
             yield report.markdown_report
 
+    # Define the asynchronous method to plan searches based on the query
     async def plan_searches(self, query: str) -> WebSearchPlan:
         """ Plan the searches to perform for the query """
         result = await run_with_retry(planner_agent, f"Query: {query}")
         return result.final_output
 
+    # Define the asynchronous method to perform searches based on the search plan
     async def perform_searches(self, search_plan: WebSearchPlan) -> list[str]:
         """ Perform the searches to perform for the query """
         tasks = [self.search(item) for item in search_plan.searches]
         return await asyncio.gather(*tasks)
 
+    # Define the asynchronous method to perform a single search based on a WebSearchItem
     async def search(self, item: WebSearchItem) -> str | None:
         """ Perform a search for the query """
         input_message = f"Search term: {item.query}\nReason for searching: {item.reason}"
         result = await run_with_retry(search_agent, input_message)
         return result.final_output
 
+    # Define the asynchronous method to write a report based on the query and search results
     async def write_report(self, query: str, search_results: list[str]) -> ReportData:
         """ Write the report for the query """
         input_message = f"Original query: {query}\nSummarized search results: {search_results}"
         result = await run_with_retry(writer_agent, input_message)
         return result.final_output
-    
+
+    # Define the asynchronous method to send an email with the report
     async def send_email(self, report: ReportData) -> None:
         await run_with_retry(email_agent, report.markdown_report)

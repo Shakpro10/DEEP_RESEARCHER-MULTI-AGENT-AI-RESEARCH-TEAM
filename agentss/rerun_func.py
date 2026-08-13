@@ -1,3 +1,6 @@
+# ================================
+# STEP 1: import necessary modules
+# ================================
 import asyncio
 import random
 from openai import APIStatusError
@@ -6,7 +9,9 @@ from agents import Runner
 # Status codes worth retrying: 429 (rate limit) and the 5xx family (server-side / capacity issues)
 RETRYABLE_STATUS_CODES = {408, 409, 429, 500, 502, 503, 504}
 
-
+# ==========================================
+# STEP 2: Define the run_with_retry function
+# ==========================================
 async def run_with_retry(agent, input_message, max_retries=6, base_delay=2.0, max_delay=60.0):
     """
     Drop-in replacement for `await Runner.run(agent, input_message)`.

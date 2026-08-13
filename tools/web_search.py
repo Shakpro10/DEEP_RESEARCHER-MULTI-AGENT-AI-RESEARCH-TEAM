@@ -13,16 +13,19 @@ Compatible with:
 Uses Tavily Search API.
 """
 
+# ============================================
+# STEP 1: import necessary modules and classes
+# ============================================
 import os
-
 from tavily import TavilyClient
-
 from agents import function_tool
 
 # Create the Tavily client once.
 client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 
-
+# ====================================================================================================================
+# STEP 2: Define the web search function and wrap it with the @function_tool decorator to make it available to the LLM
+# ====================================================================================================================
 @function_tool
 def web_search(query: str) -> str:
     """

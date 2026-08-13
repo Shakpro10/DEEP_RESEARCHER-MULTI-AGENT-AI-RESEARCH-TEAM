@@ -1,31 +1,32 @@
-"""Turns the streamed markdown report into downloadable PDF / DOCX files.
-
-Kept in its own module so `apps.py` stays focused on the UI wiring.
-"""
-
+# ============================================
+# STEP 1: import necessary modules and classes
+# ============================================
 import re
 import tempfile
 import uuid
 from pathlib import Path
-
 import gradio as gr
 from docx import Document
 from fpdf import FPDF
 
+# Define the output directory for generated reports
 OUTPUT_DIR = Path(tempfile.gettempdir()) / "pulse_reports"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
+# Define regex patterns for headings, bold, and italic markdown
 _HEADING_RE = re.compile(r"^(#{1,6})\s+(.*)")
 _BOLD_RE = re.compile(r"\*\*(.*?)\*\*")
 _ITALIC_RE = re.compile(r"\*(.*?)\*")
 
-
+# Define a helper function to strip inline markdown formatting from text
 def _strip_inline_markdown(text: str) -> str:
     text = _BOLD_RE.sub(r"\1", text)
     text = _ITALIC_RE.sub(r"\1", text)
     return text
 
-
+# ==============================================================
+# STEP 2: Define functions to build DOCX file from markdown text
+# ==============================================================
 def build_docx(markdown_text: str, path: str) -> None:
     """Very lightweight markdown -> docx converter (headings + bullets + text)."""
     doc = Document()
@@ -50,6 +51,9 @@ def build_docx(markdown_text: str, path: str) -> None:
     doc.save(path)
 
 
+# =============================================================
+# STEP 3: Define functions to build PDF file from markdown text
+# =============================================================
 def build_pdf(markdown_text: str, path: str) -> None:
     """Very lightweight markdown -> PDF converter (headings + bullets + text).
 
@@ -100,6 +104,9 @@ def build_pdf(markdown_text: str, path: str) -> None:
     pdf.output(path)
 
 
+# =====================================================================
+# STEP 4: Define a function to generate downloadable PDF and DOCX files
+# =====================================================================
 def generate_downloads(report_text: str):
     """Gradio callback: builds fresh PDF/DOCX files and reveals the two
     download buttons. Returns gr.update() pairs for (pdf_download, docx_download).

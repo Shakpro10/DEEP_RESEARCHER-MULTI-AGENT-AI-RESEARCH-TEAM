@@ -1,27 +1,25 @@
+# ============================================
+# STEP 1: import necessary modules and classes
+# ============================================
 import asyncio
 import gradio as gr
 from dotenv import load_dotenv
 from research_manager import ResearchManager
-#from .style import CSS, JS, EXAMPLES, HEADER_HTML
-#from .style_patch import CSS_PATCH, JS_PATCH
 from css_styles.styles import CSS, JS, EXAMPLES, HEADER_HTML
 from tools.report_export import generate_downloads
 
-load_dotenv(override=True)
+load_dotenv(override=True) # Load environment variables from .env file, overriding existing ones if necessary
 
-# Merge the Claude-style button / thinking-indicator CSS onto whatever
-# style.py already defines, rather than editing style.py directly.
-#CSS = CSS + CSS_PATCH
-#JS = (JS or "") + JS_PATCH
-
-
+# Define the HTML for the "thinking" indicator that shows when the research manager is processing a query
 THINKING_HTML = (
     '<div id="pulse-thinking">'
     '<span class="pulse-dot">\u2726</span> Researching&hellip;'
     "</div>"
 )
 
-
+# ==================================================================================================
+# STEP 2: Define the asynchronous function that runs the research manager and streams status updates
+# ==================================================================================================
 async def run(query: str, cancel_event: asyncio.Event | None):
     """Stream status updates from the research manager for a given query.
 
@@ -46,7 +44,9 @@ async def run(query: str, cancel_event: asyncio.Event | None):
     async for status_update in ResearchManager().run(query, cancel_event=cancel_event):
         yield status_update, status_update
 
-
+# ===============================================================================================================================
+# STEP 3: Define helper functions to manage the UI state transitions between running and idle states, and to handle stop requests
+# ===============================================================================================================================
 def enter_running_state():
     """Swap the Investigate button out for a Stop button, show the thinking
     indicator, hide any download buttons left over from a previous run, and
@@ -61,7 +61,9 @@ def enter_running_state():
         asyncio.Event(),  # cancel_state -- this run's own stop flag
     )
 
-
+# ===============================================================================================================================
+# STEP 4: Define helper functions to manage the UI state transitions between running and idle states, and to handle stop requests
+# ===============================================================================================================================
 def enter_idle_state():
     """Restore the default controls once a run finishes, errors, or is stopped."""
     return (
@@ -70,7 +72,9 @@ def enter_idle_state():
         gr.update(visible=False),  # thinking_indicator
     )
 
-
+# =========================================================================================================================
+# STEP 5: Define a helper function to handle stop requests by setting the cancellation flag and restoring the idle controls
+# =========================================================================================================================
 def request_stop(cancel_event: asyncio.Event | None):
     """Flip the current run's cancellation flag and restore idle controls.
 
@@ -83,7 +87,9 @@ def request_stop(cancel_event: asyncio.Event | None):
         cancel_event.set()
     return enter_idle_state()
 
-
+# ============================================================================================================================
+# STEP 6: Define the Gradio UI layout and components, including the query input, buttons, report display, and download options
+# ============================================================================================================================
 with gr.Blocks(title="Research Manager") as ui:
     gr.HTML(HEADER_HTML)
 
@@ -147,7 +153,9 @@ with gr.Blocks(title="Research Manager") as ui:
         outputs=[run_button, stop_button, thinking_indicator],
     )
 
-
+# ================================================================================================================================================================
+# STEP 7: Run the Gradio app with a higher concurrency limit to allow multiple events to be processed simultaneously, improving responsiveness for UI interactions
+# ================================================================================================================================================================
 if __name__ == "__main__":
     # `default_concurrency_limit` matters here: Gradio's own default is 1,
     # meaning EVERY event in the whole app -- Examples clicks, a second
