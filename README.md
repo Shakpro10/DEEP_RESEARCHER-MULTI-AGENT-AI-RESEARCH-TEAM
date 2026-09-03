@@ -107,7 +107,7 @@ Research_Agent_openAI_SDK/
 ### 1. Clone and create an environment
 
 ```bash
-git clone https://github.com/Shakpro10/Research_Agent_openAI_SDK.git
+git clone https://github.com/Shakpro10/DEEP_RESEARCHER-MULTI-AGENT-AI-RESEARCH-TEAM.git
 cd Research_Agent_openAI_SDK
 python -m venv venv
 # Windows
