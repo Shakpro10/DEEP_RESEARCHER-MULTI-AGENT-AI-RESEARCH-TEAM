@@ -108,7 +108,7 @@ Research_Agent_openAI_SDK/
 
 ```bash
 git clone https://github.com/Shakpro10/DEEP_RESEARCHER-MULTI-AGENT-AI-RESEARCH-TEAM.git
-cd Research_Agent_openAI_SDK
+cd DEEP_RESEARCHER-MULTI-AGENT-AI-RESEARCH-TEAM
 python -m venv venv
 # Windows
 venv\Scripts\activate
