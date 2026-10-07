@@ -1,6 +1,7 @@
 # ============================================
 # STEP 1: import necessary modules and classes
-# ============================================from pydantic import BaseModel, Field
+# ============================================
+from pydantic import BaseModel, Field
 from agents import Agent, OpenAIChatCompletionsModel
 from openai import AsyncOpenAI
 import os
